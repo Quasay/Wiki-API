@@ -8,4 +8,11 @@ mongoose.connect("mongodb://localhost:27017/wikiDB", {
   useUnifiedTopology: true,
 });
 
+const articleSchema = new mongoose.Schema({
+  title: String,
+  content: String,
+});
+
+const Article = mongoose.model("Article", articleSchema);
+
 app.get("/", function (req, res) {});
