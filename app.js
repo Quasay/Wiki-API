@@ -60,6 +60,22 @@ app
     });
   });
 
+app.route("/articles/:customArticleName").get(function (req, res) {
+  const articleName = req.params.customArticleName;
+
+  Article.findOne({ title: articleName }, function (err, result) {
+    if (!err) {
+      if (!result) {
+        res.send("Sorry the requested article is not in our database :(");
+      } else {
+        res.send(result);
+      }
+    } else {
+      res.send(err);
+    }
+  });
+});
+
 app.listen(3000, function () {
   console.log("Server Started on Port 3000");
 });
