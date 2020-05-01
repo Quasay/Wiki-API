@@ -23,6 +23,10 @@ const articleSchema = new mongoose.Schema({
 
 const Article = mongoose.model("Article", articleSchema);
 
+app.listen(3000, function () {
+  console.log("Server Started on Port 3000");
+});
+
 app
   .route("/articles")
   .get(function (req, res) {
@@ -35,6 +39,7 @@ app
     });
   })
   .post(function (req, res) {
+    console.log(req.body);
     const newTitle = req.body.title;
     const newContent = req.body.content;
     const newArticle = new Article({
@@ -43,7 +48,7 @@ app
     });
     newArticle.save(function (err) {
       if (!err) {
-        res.send("It worked!");
+        res.send("Article successully posted. :)");
       } else {
         res.send("Something went wrong :(");
         res.send(err);
@@ -60,22 +65,66 @@ app
     });
   });
 
-app.route("/articles/:customArticleName").get(function (req, res) {
-  const articleName = req.params.customArticleName;
+app
+  .route("/articles/:customArticleName")
+  .get(function (req, res) {
+    const articleName = req.params.customArticleName;
 
-  Article.findOne({ title: articleName }, function (err, result) {
-    if (!err) {
-      if (!result) {
-        res.send("Sorry the requested article is not in our database :(");
+    Article.findOne({ title: articleName }, function (err, result) {
+      if (!err) {
+        if (!result) {
+          res.send("Sorry the requested article is not in our database :(");
+        } else {
+          res.send(result);
+        }
       } else {
-        res.send(result);
+        res.send(err);
       }
-    } else {
-      res.send(err);
-    }
-  });
-});
+    });
+  })
+  .put(function (req, res) {
+    const articleName = req.params.customArticleName;
+    const updatedTitle = req.body.title;
+    const updatedContent = req.body.content;
 
-app.listen(3000, function () {
-  console.log("Server Started on Port 3000");
-});
+    Article.update(
+      { title: articleName },
+      { title: updatedTitle, content: updatedContent },
+      { overwrite: true },
+      function (err, result) {
+        if (!err) {
+          res.send("Successfully Updated Article!");
+        }
+      }
+    );
+  })
+  .patch(function (req, res) {
+    const articleName = req.params.customArticleName;
+
+    Article.update({ title: articleName }, { $set: req.body }, function (
+      err,
+      result
+    ) {
+      if (!err) {
+        res.send("Successfully Updated Article!");
+      }
+    });
+  })
+  .delete(function (req, res) {
+    const articleName = req.params.customArticleName;
+
+    Article.deleteOne({ title: articleName }, function (err, result) {
+      console.log(result);
+      if (!err) {
+        if (result.deletedCount === 1) {
+          res.send("Article was successully deleted!");
+        } else {
+          res.send(
+            "Could not find article to delete, maybe you already deleted it?"
+          );
+        }
+      } else {
+        res.send(err);
+      }
+    });
+  });
